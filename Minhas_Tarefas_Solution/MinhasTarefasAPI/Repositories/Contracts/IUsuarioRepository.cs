@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MinhasTarefasAPI.Repositories.Contracts
 {
-    interface IUsuarioRepository
+    public interface IUsuarioRepository
     {
         void Cadastrar(ApplicationUser usuario, string senha);
         ApplicationUser Obter(string email, string senha);
