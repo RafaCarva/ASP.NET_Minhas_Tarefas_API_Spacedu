@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,7 +51,14 @@ namespace MinhasTarefasAPI
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
-            services.AddDefaultIdentity<ApplicationUser>().AddEntityFrameworkStores<MinhasTarefasContext>();
+            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MinhasTarefasContext>();
+            services.ConfigureApplicationCookie(options=> {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
