@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MinhasTarefasAPI.Models;
 using MinhasTarefasAPI.Repositories.Contracts;
 
@@ -45,7 +48,7 @@ namespace MinhasTarefasAPI.Controllers
                     _signInManager.SignInAsync(usuario, false);
 
                     // retornar o token JWT
-                    return Ok(); // status 200
+                    return Ok(BuildToken(usuario)); // status 200
                 }
                 else
                 {
@@ -56,6 +59,30 @@ namespace MinhasTarefasAPI.Controllers
             {
                 return UnprocessableEntity(ModelState);
             }
+        }
+
+        private object BuildToken(ApplicationUser usuario)
+        {
+            var claims = new[] {
+                new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.Id)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("chave-api-jwt-minhas-tarefas")); // Recomendado -> appsettings.json
+            var sign = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var exp = DateTime.UtcNow.AddHours(1);
+
+            JwtSecurityToken token = new JwtSecurityToken(
+                issuer: null,
+                audience: null,
+                claims: claims,
+                expires: exp,
+                signingCredentials: sign
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return new { token = tokenString, expiration = exp};
         }
 
         [HttpPost("")]
