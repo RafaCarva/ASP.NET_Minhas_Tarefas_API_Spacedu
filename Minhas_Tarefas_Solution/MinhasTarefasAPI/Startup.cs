@@ -48,6 +48,7 @@ namespace MinhasTarefasAPI
             /* Repositories */
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<ITarefaRepository, TarefaRepository>();
+            services.AddScoped<ITokenRepository, TokenRepository>();
 
             /* AddJsonOptions faz o postman ignorar os possíveis loops*/
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options =>

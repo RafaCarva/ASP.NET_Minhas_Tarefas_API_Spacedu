@@ -17,5 +17,6 @@ namespace MinhasTarefasAPI.DataBase
 
         // Propriedades que vão virar tabelas
         public DbSet<Tarefa> Tarefas { get; set; }
+        public DbSet<Token> Token { get; set; }
     }
 }
