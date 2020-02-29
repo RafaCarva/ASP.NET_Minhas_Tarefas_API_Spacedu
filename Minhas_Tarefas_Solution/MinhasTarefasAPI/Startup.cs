@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,11 +17,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 using MinhasTarefasAPI.DataBase;
-using MinhasTarefasAPI.Models;
-using MinhasTarefasAPI.Repositories;
-using MinhasTarefasAPI.Repositories.Contracts;
+using MinhasTarefasAPI.V1.Models;
+using MinhasTarefasAPI.V1.Repositories;
+using MinhasTarefasAPI.V1.Repositories.Contracts;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace MinhasTarefasAPI
 {
@@ -63,6 +66,52 @@ namespace MinhasTarefasAPI
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
+            /* Versionamento */
+            services.AddApiVersioning(cfg=> {
+                cfg.ReportApiVersions = true;
+                cfg.AssumeDefaultVersionWhenUnspecified = true;
+                cfg.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+            });
+
+            /* Swagger */
+            services.AddSwaggerGen(c =>
+            {
+                /* Usar JWT na tela do swagger*/
+                c.AddSecurityDefinition("Bearer", new ApiKeyScheme() {
+                    In = "header",
+                    Type = "apiKey",
+                    Description = "Adicione o JSON Web Token (JWT) para autenticar",
+                    Name = "Authorization"
+                });
+                var security = new Dictionary<string, IEnumerable<string>>() {
+                    { "Bearer", new string[]{ } }
+                };
+                c.AddSecurityRequirement(security);
+
+                c.SwaggerDoc("v1",
+                    new Info
+                    {
+                        Title = "MinhasTarefas-API",
+                        Version = "v1",
+                        Description = "Minhas Tarefas",
+                        Contact = new Contact
+                        {
+                            Name = "Only R - Only Research",
+                            Url = "https://github.com/RafaCarva/ASP.NET_Minhas_Tarefas_API_Spacedu"
+                        }
+                    }
+                    );
+
+                var caminhoAplicacao =
+                    PlatformServices.Default.Application.ApplicationBasePath;
+                var nomeAplicacao =
+                    PlatformServices.Default.Application.ApplicationName;
+                var caminhoXmlDoc =
+                    Path.Combine(caminhoAplicacao, $"{nomeAplicacao}.xml");
+
+                c.IncludeXmlComments(caminhoXmlDoc);
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -116,6 +165,13 @@ namespace MinhasTarefasAPI
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MinhasTarefas-API");
+                c.RoutePrefix = String.Empty;
+            });
         }
     }
 }
