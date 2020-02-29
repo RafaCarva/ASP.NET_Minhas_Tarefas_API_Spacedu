@@ -51,20 +51,7 @@ namespace MinhasTarefasAPI.Controllers
                     // _signInManager.SignInAsync(usuario, false);
 
                     // retornar o token JWT
-                    var token = BuildToken(usuario);
-
-                    // Salvar o token no banco
-                    var tokenModel = new Token()
-                    {
-                        RefreshToken = token.RefreshToken,
-                        ExpirationToken = token.Expiration,
-                        ExpirationRefreshToken = token.ExpirationRefreshToken,
-                        Usuario = usuario,
-                        Criado = DateTime.Now,
-                        Utilizado = false
-                    };
-                    _tokenRepository.Cadastrar(tokenModel);
-                    return Ok(token);
+                    return GerarToken(usuario);
                 }
                 else
                 {
@@ -75,6 +62,24 @@ namespace MinhasTarefasAPI.Controllers
             {
                 return UnprocessableEntity(ModelState);
             }
+        }
+
+        private ActionResult GerarToken(ApplicationUser usuario)
+        {
+            var token = BuildToken(usuario);
+
+            // Salvar o token no banco
+            var tokenModel = new Token()
+            {
+                RefreshToken = token.RefreshToken,
+                ExpirationToken = token.Expiration,
+                ExpirationRefreshToken = token.ExpirationRefreshToken,
+                Usuario = usuario,
+                Criado = DateTime.Now,
+                Utilizado = false
+            };
+            _tokenRepository.Cadastrar(tokenModel);
+            return Ok(token);
         }
 
         private TokenDTO BuildToken(ApplicationUser usuario)
@@ -106,6 +111,25 @@ namespace MinhasTarefasAPI.Controllers
                 ExpirationRefreshToken = expRefreshToken};
 
             return tokenDTO;
+        }
+
+        [HttpPost("renovar")]
+        public ActionResult Renovar([FromBody]TokenDTO tokenDTO)
+        {
+            var refreshTokenDB = _tokenRepository.Obter(tokenDTO.RefreshToken);
+            if (refreshTokenDB==null)
+            {
+                return NotFound();
+            }
+            // RefreshToken antigo - Atualizar - Desativar esse refreshToken
+            refreshTokenDB.Atualizado = DateTime.Now;
+            refreshTokenDB.Utilizado = true;
+            _tokenRepository.Atualizar(refreshTokenDB);
+
+            // Gerar o novo token/Refresh - salvar 
+            var usuario = _usuarioRepository.Obter(refreshTokenDB.UsuarioId);
+            return GerarToken(usuario);
+
         }
 
         [HttpPost("")]

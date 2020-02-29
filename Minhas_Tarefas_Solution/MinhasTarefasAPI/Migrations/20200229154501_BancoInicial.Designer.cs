@@ -9,7 +9,7 @@ using MinhasTarefasAPI.DataBase;
 namespace MinhasTarefasAPI.Migrations
 {
     [DbContext(typeof(MinhasTarefasContext))]
-    [Migration("20200223195217_BancoInicial")]
+    [Migration("20200229154501_BancoInicial")]
     partial class BancoInicial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -179,7 +179,7 @@ namespace MinhasTarefasAPI.Migrations
 
             modelBuilder.Entity("MinhasTarefasAPI.Models.Tarefa", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("IdTarefaApi")
                         .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("Atualizado");
@@ -192,6 +192,10 @@ namespace MinhasTarefasAPI.Migrations
 
                     b.Property<string>("Descricao");
 
+                    b.Property<bool>("Excluido");
+
+                    b.Property<int>("IdTarefaApp");
+
                     b.Property<string>("Local");
 
                     b.Property<string>("Tipo");
@@ -200,11 +204,37 @@ namespace MinhasTarefasAPI.Migrations
 
                     b.Property<string>("UsuarioId");
 
-                    b.HasKey("Id");
+                    b.HasKey("IdTarefaApi");
 
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Tarefas");
+                });
+
+            modelBuilder.Entity("MinhasTarefasAPI.Models.Token", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime?>("Atualizado");
+
+                    b.Property<DateTime>("Criado");
+
+                    b.Property<DateTime>("ExpirationRefreshToken");
+
+                    b.Property<DateTime>("ExpirationToken");
+
+                    b.Property<string>("RefreshToken");
+
+                    b.Property<string>("UsuarioId");
+
+                    b.Property<bool>("Utilizado");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Token");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -256,6 +286,13 @@ namespace MinhasTarefasAPI.Migrations
                 {
                     b.HasOne("MinhasTarefasAPI.Models.ApplicationUser", "Usuario")
                         .WithMany("Tarefas")
+                        .HasForeignKey("UsuarioId");
+                });
+
+            modelBuilder.Entity("MinhasTarefasAPI.Models.Token", b =>
+                {
+                    b.HasOne("MinhasTarefasAPI.Models.ApplicationUser", "Usuario")
+                        .WithMany("Tokens")
                         .HasForeignKey("UsuarioId");
                 });
 #pragma warning restore 612, 618

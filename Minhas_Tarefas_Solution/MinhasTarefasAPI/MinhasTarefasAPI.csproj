@@ -6,6 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200223195217_BancoInicial.cs" />
+    <Compile Remove="Migrations\20200223195217_BancoInicial.Designer.cs" />
+    <Compile Remove="Migrations\20200223205614_TarefaSincronizacao.cs" />
+    <Compile Remove="Migrations\20200223205614_TarefaSincronizacao.Designer.cs" />
+    <Compile Remove="Migrations\20200227002613_Token.cs" />
+    <Compile Remove="Migrations\20200227002613_Token.Designer.cs" />
+    <Compile Remove="Migrations\20200229153654_AddFKToken.cs" />
+    <Compile Remove="Migrations\20200229153654_AddFKToken.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.6" />
