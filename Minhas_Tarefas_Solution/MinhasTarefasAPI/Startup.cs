@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,7 +52,15 @@ namespace MinhasTarefasAPI
             services.AddScoped<ITokenRepository, TokenRepository>();
 
             /* AddJsonOptions faz o postman ignorar os possíveis loops*/
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options =>
+            services.AddMvc(config=> {
+                /* Retornar um 406 caso não suporte o formato */
+                config.ReturnHttpNotAcceptable = true;
+
+                /* Add suporte ao XML */
+                config.InputFormatters.Add(new XmlSerializerInputFormatter(config));
+                config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+            })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
